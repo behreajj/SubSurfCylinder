@@ -158,7 +158,13 @@ class TubeMaker(bpy.types.Operator):
         # If not, then default to an n-gon face.
         if (sectors < 5) or (sectors % 2 != 0):
             cap_is_quad = False
-            cap_is_ngon = True
+            if not cap_is_none:
+                cap_is_ngon = True
+
+        if sectors < 4:
+            cap_is_tri = False
+            if not cap_is_none:
+                cap_is_ngon = True
 
         # Convert offset from [-1.0, 1.0] to [0.0, 1.0],
         # Use it as a factor to find the cylinder's middle
