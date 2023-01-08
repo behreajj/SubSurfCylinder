@@ -146,13 +146,6 @@ class TubeMaker(bpy.types.Operator):
         cap_is_quad = cap_face_type == "QUAD"
         cap_is_tri = cap_face_type == "TRI"
 
-        # Derive some booleans from combinations of the above.
-        # Used in deciding index offsets for vertices and faces.
-        use_center_spoke = cap_is_tri or cap_is_quad
-        use_caps = cap_is_tri or cap_is_quad or cap_is_ngon
-        use_edge_loops = edge_loop_fac > 0.0 \
-                     and edge_loop_fac < 1.0
-
         # A quadrilateral based end cap is possible only
         # when the number of sectors or vertices is even.
         # If not, then default to an n-gon face.
@@ -165,6 +158,13 @@ class TubeMaker(bpy.types.Operator):
             cap_is_tri = False
             if not cap_is_none:
                 cap_is_ngon = True
+
+        # Derive some booleans from combinations of the above.
+        # Used in deciding index offsets for vertices and faces.
+        use_center_spoke = cap_is_tri or cap_is_quad
+        use_caps = cap_is_tri or cap_is_quad or cap_is_ngon
+        use_edge_loops = edge_loop_fac > 0.0 \
+                     and edge_loop_fac < 1.0
 
         # Convert offset from [-1.0, 1.0] to [0.0, 1.0],
         # Use it as a factor to find the cylinder's middle
