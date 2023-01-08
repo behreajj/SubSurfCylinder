@@ -156,6 +156,7 @@ class TubeMaker(bpy.types.Operator):
 
         if sectors < 4:
             cap_is_tri = False
+            cap_is_quad = False
             if not cap_is_none:
                 cap_is_ngon = True
 
@@ -368,9 +369,9 @@ class TubeMaker(bpy.types.Operator):
         loop_idx_btm_mid = loop_idx_btm_fan
         if cap_is_ngon:
             loop_idx_btm_mid += 1
-        elif cap_is_quad:
+        if cap_is_quad:
             loop_idx_btm_mid += half_sectors
-        elif cap_is_tri:
+        if cap_is_tri:
             loop_idx_btm_mid += sectors
 
         loop_idx_btm_ctrl = loop_idx_btm_mid
@@ -406,9 +407,9 @@ class TubeMaker(bpy.types.Operator):
         len_loop_idcs = loop_idx_top_fan
         if cap_is_ngon:
             len_loop_idcs += 1
-        elif cap_is_quad:
+        if cap_is_quad:
             len_loop_idcs += half_sectors
-        elif cap_is_tri:
+        if cap_is_tri:
             len_loop_idcs += sectors
 
         v_idcs = [(0, 0, 0, 0)] * len_loop_idcs
@@ -425,7 +426,7 @@ class TubeMaker(bpy.types.Operator):
                     v_idx_top_spoke,
                     v_idx_top_fan + i,
                     v_idx_top_fan + j)
-        elif cap_is_quad:
+        if cap_is_quad:
             for h in half_sectors_range:
                 i = h + h
                 j = (i + 1) % sectors
@@ -440,7 +441,7 @@ class TubeMaker(bpy.types.Operator):
                     v_idx_top_fan + i,
                     v_idx_top_fan + j,
                     v_idx_top_fan + k)
-        elif cap_is_ngon:
+        if cap_is_ngon:
             idcs_btm_arr = [0] * sectors
             idcs_top_arr = [0] * sectors
             for i in sectors_range:
@@ -703,7 +704,7 @@ class TubeMaker(bpy.types.Operator):
                         vt_idx_top_spoke, 
                         vt_idx_top_fan + i,
                         vt_idx_top_fan + j)
-            elif cap_is_quad:
+            if cap_is_quad:
                 for h in half_sectors_range:
                     i = h + h
                     j = (i + 1) % sectors
@@ -718,7 +719,7 @@ class TubeMaker(bpy.types.Operator):
                         vt_idx_top_fan + i,
                         vt_idx_top_fan + j,
                         vt_idx_top_fan + k)
-            elif cap_is_ngon:
+            if cap_is_ngon:
                 idcs_btm_arr = [0] * sectors
                 idcs_top_arr = [0] * sectors
                 for i in sectors_range:
