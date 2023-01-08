@@ -123,6 +123,8 @@ class TubeMaker(bpy.types.Operator):
         default=False)
 
     def execute(self, context):
+        # TODO: Add options to mark seams if UV coordinates are calculated?
+
         # Unpack arguments.
         sectors = self.sectors
         orientation = self.orientation
