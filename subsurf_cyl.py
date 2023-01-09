@@ -16,13 +16,13 @@ bl_info = {
     "version": (0, 1),
     "blender": (3, 3, 1),
     "category": "Add Mesh",
-    "description": "Creates a tube.",
-    "tracker_url": "https://github.com/behreajj/"
+    "description": "Creates a subdivision surface ready cylinder.",
+    "tracker_url": "https://github.com/behreajj/SubSurfCylinder"
 }
 
 
 class TubeMaker(bpy.types.Operator):
-    """Creates a tube"""
+    """Creates a subdivision surface ready cylinder"""
 
     bl_idname = "mesh.primitive_tube_add"
     bl_label = "Tube"
@@ -123,8 +123,6 @@ class TubeMaker(bpy.types.Operator):
         default=False)
 
     def execute(self, context):
-        # TODO: Add options to mark seams if UV coordinates are calculated?
-
         # Unpack arguments.
         sectors = self.sectors
         orientation = self.orientation
@@ -296,8 +294,10 @@ class TubeMaker(bpy.types.Operator):
             side_lwr_ctrl_z = u_btm * vz_btm + t_btm * vz_mid
             side_upp_ctrl_z = u_top * vz_top + t_top * vz_mid
 
-            radius_side_lwr_ctrl = u_btm * radius_btm + t_btm * radius_mid
-            radius_side_upp_ctrl = u_top * radius_top + t_top * radius_mid
+            radius_side_lwr_ctrl = u_btm * radius_btm \
+                                 + t_btm * radius_mid
+            radius_side_upp_ctrl = u_top * radius_top \
+                                 + t_top * radius_mid
 
             # Find the middle ring, lower and upper control
             # loops on the side of the cylinder.
@@ -482,8 +482,7 @@ class TubeMaker(bpy.types.Operator):
 
             # Create side panel faces.
             for i in sectors_range:
-                j = i + 1
-                k = j % sectors
+                k = (i + 1) % sectors
 
                 v_idcs[loop_idx_side_lwr_ctrl + i] = (
                     v_idx_btm_edge + i,
@@ -510,9 +509,7 @@ class TubeMaker(bpy.types.Operator):
                     v_idx_top_edge + i)
         else:
             for i in sectors_range:
-                j = i + 1
-                k = j % sectors
-
+                k = (i + 1) % sectors
                 v_idcs[loop_idx_side_lwr_ctrl + i] = (
                     v_idx_btm_edge + i,
                     v_idx_btm_edge + k,
@@ -618,8 +615,10 @@ class TubeMaker(bpy.types.Operator):
 
             if use_edge_loops:
                 vts_mid_y = (vts_min_y + vts_max_y) * 0.5
-                vt_side_lwr_ctrl_y = u_btm * vts_min_y + t_btm * vts_mid_y
-                vt_side_upp_ctrl_y = u_top * vts_max_y + t_top * vts_mid_y
+                vt_side_lwr_ctrl_y = u_btm * vts_min_y \
+                                   + t_btm * vts_mid_y
+                vt_side_upp_ctrl_y = u_top * vts_max_y \
+                                   + t_top * vts_mid_y
 
                 for j in sectorsp1_range:
                     x = j * sectors_to_uv
@@ -628,12 +627,10 @@ class TubeMaker(bpy.types.Operator):
                     vts[vt_idx_side_upp_ctrl + j] = (x, vt_side_upp_ctrl_y)
 
             if use_caps:
-                vts_rad = 0.25
-
                 # Follows Blender UV conventions.
+                vts_rad = 0.25
                 vt_btm_center_x = 0.75
                 vt_btm_center_y = 0.25
-
                 vt_top_center_x = 0.25
                 vt_top_center_y = 0.25
 
@@ -648,16 +645,16 @@ class TubeMaker(bpy.types.Operator):
 
                 for i in sectors_range:
                     cart = cartesian[i]
-                    cos_t = cart[0]
-                    sin_t = cart[1]
+                    cos_t_r = cart[0] * vts_rad
+                    sin_t_r = cart[1] * vts_rad
 
                     vts[vt_idx_btm_edge + i] = (
-                        vt_btm_center_x + cos_t * vts_rad,
-                        vt_btm_center_y + sin_t * vts_rad)
+                        vt_btm_center_x + cos_t_r,
+                        vt_btm_center_y + sin_t_r)
 
                     vts[vt_idx_top_edge + i] = (
-                        vt_top_center_x + cos_t * vts_rad,
-                        vt_top_center_y + sin_t * vts_rad)
+                        vt_top_center_x + cos_t_r,
+                        vt_top_center_y + sin_t_r)
 
                 if use_edge_loops:
                     vts_radius_mid = vts_rad * 0.5
@@ -788,7 +785,6 @@ class TubeMaker(bpy.types.Operator):
 
             uv_layer = bm.loops.layers.uv.verify()
             for face in bm.faces:
-                face.smooth = shade_smooth
                 faceuvidcs = vt_idcs[face.index]
                 for i, loop in enumerate(face.loops):
                     loop[uv_layer].uv = vts[faceuvidcs[i]]
