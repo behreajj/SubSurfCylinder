@@ -79,9 +79,9 @@ class TubeMaker(bpy.types.Operator):
     cap_face_type: EnumProperty(
         items=[
             ("NGON", "NGon", "Use n-sides polygons", 1),
-            ("QUAD", "Quad", "Use quadrilaterals for an even number of vertices", 2),
-            ("TRI", "Tri", "Use triangles", 3),
-            ("NONE", "None", "Do not add end caps", 4)
+            ("NONE", "None", "Do not add end caps", 2),
+            ("QUAD", "Quad", "Use quadrilaterals for an even number of vertices", 3),
+            ("TRI", "Tri", "Use triangles", 4)
         ],
         name="Cap Fill Type",
         default="QUAD",
@@ -180,39 +180,44 @@ class TubeMaker(bpy.types.Operator):
         t = edge_loop_fac
         u = 1.0 - t
 
+        # Find the length of the cylinder's sides in cases
+        # where top and bottom radii are unequal.
+        diff = radius_top - radius_btm
+        slope = math.sqrt(diff * diff + depth * depth)
+
         # To make the rounding of a Catmull Subsurf modifier
         # more uniform, the factors used to set control loops
-        # need to be scaled according to whether depth is
-        # greater than radius or vice versa.
+        # need to be scaled according to whether cylinder sides
+        # are greater than radius or vice versa.
         aspect_ratio_btm = 1.0
         aspect_ratio_top = 1.0
-        if use_caps:
-            aspect_ratio_btm = radius_btm / depth
-            aspect_ratio_top = radius_top / depth
+        if use_caps:          
+            aspect_ratio_btm = radius_btm / slope
+            aspect_ratio_top = radius_top / slope
 
         # For control loops on side panels.
         t_btm = t
         u_btm = u
-        if radius_btm < depth:
+        if radius_btm < slope:
             t_btm = t * aspect_ratio_btm
             u_btm = 1.0 - t_btm
 
         t_top = t
         u_top = u
-        if radius_top < depth:
+        if radius_top < slope:
             t_top = t * aspect_ratio_top
             u_top = 1.0 - t_top
 
         # For control loops on end caps.
         t_fan_btm = t
         u_fan_btm = u
-        if radius_btm >= depth:
+        if radius_btm > slope:
             t_fan_btm = t / aspect_ratio_btm
             u_fan_btm = 1.0 - t_fan_btm
 
         t_fan_top = t
         u_fan_top = u
-        if radius_top >= depth:
+        if radius_top > slope:
             t_fan_top = t / aspect_ratio_top
             u_fan_top = 1.0 - t_fan_top
 
@@ -606,6 +611,10 @@ class TubeMaker(bpy.types.Operator):
             # Find the top and bottom of the uv sides.
             # UVs include one extra edge, as the wrapping
             # at (0.0, 1.0) is automatically calculated.
+
+            # Ideally, these would be trapezoids when the top
+            # and bottom radius differ, but if the goal is subsurf
+            # then artifacts of connected rects will be reduced.
             sectorsp1_range = range(0, sectorsp1)
             sectors_to_uv = 1.0 / sectors
             for j in sectorsp1_range:
