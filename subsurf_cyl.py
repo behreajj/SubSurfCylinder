@@ -1,7 +1,6 @@
 import bpy
 import bmesh
 import math
-import mathutils
 from bpy.props import (
     BoolProperty,
     IntProperty,
@@ -13,8 +12,8 @@ from bpy.props import (
 bl_info = {
     "name": "Create Tube",
     "author": "Jeremy Behreandt",
-    "version": (0, 1),
-    "blender": (3, 3, 1),
+    "version": (0, 2),
+    "blender": (4, 1, 0),
     "category": "Add Mesh",
     "description": "Creates a subdivision surface ready cylinder.",
     "tracker_url": "https://github.com/behreajj/SubSurfCylinder"
@@ -91,7 +90,7 @@ class TubeMaker(bpy.types.Operator):
     edge_loop_fac: FloatProperty(
         name="Edge Loops",
         description="Add loops used to control a subdivision surface modifier.",
-        default=0.0,
+        default=0.15,
         step=1,
         precision=3,
         min=0.0,
@@ -101,26 +100,20 @@ class TubeMaker(bpy.types.Operator):
     shade_smooth: BoolProperty(
         name="Shade Smooth",
         description="Whether to use smooth shading",
-        default=True)
-
-    auto_normals: BoolProperty(
-        name="Auto Smooth",
-        description="Auto smooth (based on smooth/sharp faces/edges and angle between faces)",
-        default=True)
-
-    auto_angle: FloatProperty(
-        name="Auto Smooth Angle",
-        description="Maximum angle between face normals that will be considered as smooth",
-        subtype="ANGLE",
-        min=0.0,
-        max=3.14159,
-        step=100,
-        default=0.523599)
+        default=False)
 
     calc_uvs: BoolProperty(
         name="Calc UVs",
         description="Calculate texture coordinates",
         default=False)
+    
+    levels: IntProperty(
+        name="Subsurf",
+        description="Number of subdivisions in modifier.",
+        min=0,
+        soft_max=6,
+        max=11,
+        default=0)
 
     def execute(self, context):
         # Unpack arguments.
@@ -133,9 +126,8 @@ class TubeMaker(bpy.types.Operator):
         cap_face_type = self.cap_face_type
         edge_loop_fac = self.edge_loop_fac
         shade_smooth = self.shade_smooth
-        auto_normals = self.auto_normals
-        auto_angle = self.auto_angle
         calc_uvs = self.calc_uvs
+        levels = self.levels
 
         # Convert string comparisons of cap face type
         # to booleans.
@@ -528,8 +520,6 @@ class TubeMaker(bpy.types.Operator):
         mesh_data = d_meshes.new("Cylinder")
         mesh_data.from_pydata(vs, [], v_idcs)
         mesh_data.validate(verbose=True)
-        mesh_data.use_auto_smooth = auto_normals
-        mesh_data.auto_smooth_angle = auto_angle
 
         bm = bmesh.new()
         bm.from_mesh(mesh_data)
@@ -803,6 +793,13 @@ class TubeMaker(bpy.types.Operator):
 
         mesh_obj = d_objs.new(mesh_data.name, mesh_data)
         mesh_obj.location = context.scene.cursor.location
+
+        if levels > 0:
+            sds_mod = mesh_obj.modifiers.new("Subdivision", "SUBSURF")
+            sds_mod.levels = levels
+            sds_mod.render_levels = levels
+            sds_mod.uv_smooth = "SMOOTH_ALL"
+
         scene_objs.link(mesh_obj)
 
         return {"FINISHED"}
