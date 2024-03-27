@@ -90,12 +90,20 @@ class TubeMaker(bpy.types.Operator):
     edge_loop_fac: FloatProperty(
         name="Edge Loops",
         description="Add loops used to control a subdivision surface modifier.",
-        default=0.15,
+        default=0.175,
         step=1,
         precision=3,
         min=0.0,
         max=1.0,
         subtype="FACTOR")
+
+    levels: IntProperty(
+        name="Subsurf",
+        description="Number of subdivisions in modifier.",
+        min=0,
+        soft_max=6,
+        max=6,
+        default=0)
 
     shade_smooth: BoolProperty(
         name="Shade Smooth",
@@ -106,14 +114,6 @@ class TubeMaker(bpy.types.Operator):
         name="Calc UVs",
         description="Calculate texture coordinates",
         default=False)
-    
-    levels: IntProperty(
-        name="Subsurf",
-        description="Number of subdivisions in modifier.",
-        min=0,
-        soft_max=6,
-        max=11,
-        default=0)
 
     def execute(self, context):
         # Unpack arguments.
@@ -799,6 +799,7 @@ class TubeMaker(bpy.types.Operator):
             sds_mod.levels = levels
             sds_mod.render_levels = levels
             sds_mod.uv_smooth = "SMOOTH_ALL"
+            sds_mod.show_in_editmode = False
 
         scene_objs.link(mesh_obj)
 
