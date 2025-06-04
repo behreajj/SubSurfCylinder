@@ -1,12 +1,11 @@
-import bpy
-import bmesh
+import bpy # type: ignore
+import bmesh # type: ignore
 import math
-from bpy.props import (
+from bpy.props import ( # type: ignore
     BoolProperty,
     IntProperty,
     EnumProperty,
-    FloatProperty,
-    FloatVectorProperty)
+    FloatProperty)
 
 
 bl_info = {
@@ -28,14 +27,14 @@ class TubeMaker(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
 
-    sectors: IntProperty(
+    sectors: IntProperty( # type: ignore
         name="Vertices",
         description="Number of vertices on the tube circumference",
         min=3,
         soft_max=64,
         default=8)
 
-    orientation: FloatProperty(
+    orientation: FloatProperty( # type: ignore
         name="Rotation",
         description="Rotation of the tube",
         soft_min=-math.pi,
@@ -44,28 +43,28 @@ class TubeMaker(bpy.types.Operator):
         subtype="ANGLE",
         unit="ROTATION")
 
-    radius_btm: FloatProperty(
+    radius_btm: FloatProperty( # type: ignore
         name="Bottom Radius",
         description="Tube radius at the bottom",
         min=0.001,
         soft_max=100.0,
         default=0.5)
 
-    radius_top: FloatProperty(
+    radius_top: FloatProperty( # type: ignore
         name="Top Radius",
         description="Tube radius at the top",
         min=0.001,
         soft_max=100.0,
         default=0.5)
 
-    depth: FloatProperty(
+    depth: FloatProperty( # type: ignore
         name="Depth",
         description="Tube depth",
         min=0.001,
         soft_max=100.0,
         default=1.5)
 
-    depth_offset: FloatProperty(
+    depth_offset: FloatProperty( # type: ignore
         name="Offset",
         description="Offset on the z axis",
         default=0.0,
@@ -75,7 +74,7 @@ class TubeMaker(bpy.types.Operator):
         max=1.0,
         subtype="FACTOR")
 
-    cap_face_type: EnumProperty(
+    cap_face_type: EnumProperty( # type: ignore
         items=[
             ("NGON", "NGon", "Use n-sides polygons", 1),
             ("NONE", "None", "Do not add end caps", 2),
@@ -87,7 +86,7 @@ class TubeMaker(bpy.types.Operator):
         description="How to create end cap polygons"
     )
 
-    edge_loop_fac: FloatProperty(
+    edge_loop_fac: FloatProperty( # type: ignore
         name="Edge Loops",
         description="Add loops used to control a subdivision surface modifier.",
         default=0.175,
@@ -97,7 +96,7 @@ class TubeMaker(bpy.types.Operator):
         max=1.0,
         subtype="FACTOR")
 
-    levels: IntProperty(
+    levels: IntProperty( # type: ignore
         name="Subsurf",
         description="Number of subdivisions in modifier.",
         min=0,
@@ -105,12 +104,12 @@ class TubeMaker(bpy.types.Operator):
         max=6,
         default=0)
 
-    shade_smooth: BoolProperty(
+    shade_smooth: BoolProperty( # type: ignore
         name="Shade Smooth",
         description="Whether to use smooth shading",
         default=False)
 
-    calc_uvs: BoolProperty(
+    calc_uvs: BoolProperty( # type: ignore
         name="Calc UVs",
         description="Calculate texture coordinates",
         default=False)
@@ -400,7 +399,7 @@ class TubeMaker(bpy.types.Operator):
             loop_idx_top_mid += sectors
 
         loop_idx_top_fan = loop_idx_top_mid + sectors
-   
+
         len_loop_idcs = loop_idx_top_fan
         if cap_is_ngon:
             len_loop_idcs += 1
@@ -515,7 +514,7 @@ class TubeMaker(bpy.types.Operator):
 
         d_objs = bpy.data.objects
         d_meshes = bpy.data.meshes
-        scene_objs = context.scene.collection.objects
+        scene_objs = context.collection.objects
 
         mesh_data = d_meshes.new("Cylinder")
         mesh_data.from_pydata(vs, [], v_idcs)
